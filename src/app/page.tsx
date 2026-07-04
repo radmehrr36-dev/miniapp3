@@ -195,33 +195,39 @@ export default function ChatApp() {
     setSidebarOpen(false);
   };
 
-  // New Chat
-// New Chat با پیام لاگین برای کاربران مهمان
-const handleNewChat = async (userIdParam?: number) => {
-  const targetUserId = userIdParam || user?.id;
-  
-  if (!targetUserId) {
-    // نمایش یک هشدار زیبا به کاربر
-    alert("⚠️ برای ایجاد گفتگوی جدید، لطفاً ابتدا وارد حساب کاربری خود شوید.");
-    // باز کردن مودال پروفایل برای لاگین
-    setProfileModalOpen(true);
-    return;
-  }
+  // ============================================
+  // ✅ New Chat - نسخه اصلاح‌شده نهایی
+  // ============================================
+  const handleNewChat = async (userIdParam?: number) => {
+    const targetUserId = userIdParam || user?.id;
+    
+    // اگر کاربر لاگین نکرده، پیام بده و مودال لاگین را باز کن
+    if (!targetUserId) {
+      alert("⚠️ برای ایجاد گفتگوی جدید، لطفاً ابتدا وارد حساب کاربری خود شوید.");
+      setProfileModalOpen(true);
+      return;
+    }
 
-  // ادامه کد برای ایجاد چت جدید
-  try {
-    const res = await fetch("/api/sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: targetUserId,
-        title: "چت جدید",
-        modelUsed: userSettings.defaultModel || "auto",
-      }),
-    });
+    console.log("🔄 ایجاد گفتگوی جدید برای کاربر:", targetUserId);
 
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: targetUserId,
+          title: "چت جدید",
+          modelUsed: userSettings.defaultModel || "auto",
+        }),
+      });
+
       const data = await res.json();
+      console.log("📨 پاسخ سرور:", data);
+
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP error! status: ${res.status}`);
+      }
+
       if (data.success && data.session) {
         setSessions((prev) => [data.session, ...prev]);
         setActiveSessionId(data.session.id);
@@ -234,12 +240,17 @@ const handleNewChat = async (userIdParam?: number) => {
           },
         ]);
         setSidebarOpen(false);
+        console.log("✅ گفتگوی جدید با موفقیت ایجاد شد:", data.session.id);
+      } else {
+        console.error("⚠️ پاسخ سرور موفقیت‌آمیز نبود:", data);
+        alert("متأسفانه ایجاد گفتگوی جدید با مشکل مواجه شد.");
       }
+    } catch (err) {
+      console.error("❌ خطا در ایجاد گفتگوی جدید:", err);
+      alert("خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.");
     }
-  } catch (err) {
-    console.error("New chat error:", err);
-  }
-};
+  };
+
   // Delete Session
   const handleDeleteSession = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
