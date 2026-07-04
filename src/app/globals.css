@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-text: var(--text);
+  --color-border: var(--border);
+
+  --font-heading: var(--font-poppins), var(--font-vazirmatn), system-ui, sans-serif;
+  --font-body: var(--font-vazirmatn), var(--font-inter), system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    --primary: #6C2BD9;
+    --secondary: #00D4FF;
+    --accent: #FF2D95;
+    --background: #F8F9FA;
+    --card: rgba(255, 255, 255, 0.7);
+    --text: #1A1A2E;
+    --border: #E2E8F0;
+  }
+
+  .dark {
+    --primary: #8B5CF6;
+    --secondary: #38BDF8;
+    --accent: #F472B6;
+    --background: #0D0D1A;
+    --card: rgba(30, 30, 60, 0.8);
+    --text: #F1F5F9;
+    --border: #2D2D5E;
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--text);
+    font-family: var(--font-body);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 20px;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+.glass-card {
+  background-color: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
