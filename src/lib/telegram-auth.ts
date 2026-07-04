@@ -1,5 +1,8 @@
 import crypto from 'crypto';
 
+// ============================================
+// 🤖 وریفای دیتای تلگرام
+// ============================================
 export function verifyTelegramInitData(initData: string, botToken: string): {
   ok: boolean;
   user?: any;
@@ -46,5 +49,32 @@ export function verifyTelegramInitData(initData: string, botToken: string): {
   } catch (error: any) {
     console.error('Verification error:', error);
     return { ok: false, error: error.message || 'Verification failed' };
+  }
+}
+
+// ============================================
+// 📡 دریافت اطلاعات ربات از تلگرام
+// ============================================
+export async function getBotInfo(botToken: string): Promise<{
+  ok: boolean;
+  botUsername?: string;
+  botName?: string;
+  error?: string;
+}> {
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+    const data = await response.json();
+
+    if (!data.ok) {
+      return { ok: false, error: data.description || 'Bot API error' };
+    }
+
+    return {
+      ok: true,
+      botUsername: data.result.username,
+      botName: data.result.first_name,
+    };
+  } catch (error: any) {
+    return { ok: false, error: error.message || 'Network error' };
   }
 }
