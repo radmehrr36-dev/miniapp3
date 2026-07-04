@@ -1,29 +1,10 @@
 import { NextResponse } from 'next/server';
-import { db } from "@/db";
-import { users, chatSessions } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { verifyTelegramInitData, getBotInfo } from "@/lib/telegram-auth";
+import { verifyTelegramInitData } from '@/lib/telegram-auth';
+// اگر از دیتابیس استفاده می‌کنید، این خط را اضافه کنید
+// import { db } from "@/db";
+// import { users } from "@/db/schema";
+// import { eq } from "drizzle-orm";
 
-// GET handler
-export async function GET() {
-  const token = process.env.TELEGRAM_BOT_TOKEN || "";
-  if (!token) {
-    return NextResponse.json({
-      configured: false,
-      message: "توکن ربات تلگرام تنظیم نشده است. مقدار TELEGRAM_BOT_TOKEN را در فایل .env قرار دهید.",
-    });
-  }
-  const info = await getBotInfo(token);
-  return NextResponse.json({
-    configured: true,
-    live: info.ok,
-    botUsername: info.botUsername,
-    botName: info.botName,
-    error: info.error,
-  });
-}
-
-// POST handler
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -48,6 +29,10 @@ export async function POST(req: Request) {
     const tgUser = verified.user;
     const telegramId = String(tgUser.id);
 
+    // ============================================
+    // 🔽 بخش دیتابیس (در صورت نیاز فعال کنید)
+    // ============================================
+    /*
     const existing = await db.select().from(users).where(eq(users.telegramId, telegramId));
 
     if (existing.length > 0) {
@@ -83,15 +68,38 @@ export async function POST(req: Request) {
       .returning();
 
     const newUser = created[0];
-    await db.insert(chatSessions).values({
-      userId: newUser.id,
-      title: "چت معارفه Rad AI",
-      modelUsed: "auto",
-    });
+    // در صورت نیاز، یک جلسه چت پیش‌فرض ایجاد کنید
+    // await db.insert(chatSessions).values({ userId: newUser.id, title: "چت معارفه", modelUsed: "auto" });
 
     return NextResponse.json({ success: true, user: newUser, isNew: true, verified: true });
+    */
+    // ============================================
+    // 🔼 پایان بخش دیتابیس
+    // ============================================
+
+    // اگر از دیتابیس استفاده نمی‌کنید، یک پاسخ ساده برگردانید
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: tgUser.id,
+        telegramId: telegramId,
+        username: tgUser.username || `tg_${telegramId}`,
+        firstName: tgUser.first_name || "کاربر",
+        lastName: tgUser.last_name || "",
+        photoUrl: tgUser.photo_url || null,
+        languageCode: tgUser.language_code || "fa",
+        isPremium: tgUser.is_premium ?? false,
+        authSource: "telegram",
+      },
+      isNew: true,
+      verified: true,
+    });
+
   } catch (error: any) {
     console.error("Telegram auth error:", error);
-    return NextResponse.json({ error: error.message || "خطای داخلی سرور" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "خطای داخلی سرور" },
+      { status: 500 }
+    );
   }
 }
