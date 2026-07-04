@@ -60,3 +60,5 @@ Thumbs.db
 *.key
 *.crt
 *.p12
+# Local Netlify folder
+.netlify
